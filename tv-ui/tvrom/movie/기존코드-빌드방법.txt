@@ -1,23 +1,42 @@
+
+
+최종 빌드(PyInstaller) 하실 때 완벽 확인 가이드
+
+1.  player.py 먼저 빌드하기 (현재 폴더에 player.py가 있는 상태에서 입력)
+
+pyinstaller --noconfirm --onefile --console player.py
+
+2.  ui.py와 합쳐서 최종 tvroom.exe 만들기
+
+pyinstaller --noconfirm --onefile --windowed --add-data "dist/player.exe;." --collect-all customtkinter --name "tvroom" ui.py
+
+*** 기존에 생성된 찌꺼기 폴더 삭제 ***
+
+Remove-Item -Recurse -Force build, dist
+-----------------------------------------------
+-----------------------------------------------
+기존 깃허브 연동하기전 코드입니다..
+-----------------------------------------------
+
 import json
 import logging
 import os
 import subprocess
 import sys
 import threading
-import requests
 import time
 from tkinter import messagebox
-import customtkinter as ctk
 from bs4 import BeautifulSoup
+import customtkinter as ctk
+
+# Selenium 관련 라이브러리 추가
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Selenium 라이브러리 탑재 (보안 우회용)
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-
 # =====================================================================
-# 📺 [TV 전용 폰트 제어 설정]
+# 📺 [TV 전용 폰트 제어 설정] - 여기서 크기와 패밀리를 자유롭게 수정하세요!
 # =====================================================================
 class FontConfig:
     FONT_FAMILY = "NanumGothic"
@@ -25,7 +44,7 @@ class FontConfig:
     # 폰트 크기 정의
     SIZE_MAIN_TITLE = 55  # 메인 화면 최상단 타이틀
     SIZE_PAGE_TITLE = 50  # 카테고리 페이지 상단 타이틀
-    SIZE_LIST_ITEM  = 45  # 카테고리 목록 폰트
+    SIZE_LIST_ITEM  = 45  # 기존 타이틀급으로 키운 카테고리 목록 폰트
     SIZE_MAIN_MENU  = 40  # 메인 메뉴 버튼 폰트
     SIZE_BACK_BTN   = 35  # 뒤로가기 버튼 폰트
 
@@ -65,7 +84,7 @@ class UltraMediaCenter(ctk.CTk):
         super().__init__()
         self.title("ULTRA 미디어 센터")
         
-        # 📺 실행 시 윈도우 창을 전체 화면으로 고정
+        # 📺 실행 시 윈도우 창을 전체 화면(Maximized)으로 고정합니다.
         self.after(0, lambda: self.wm_state('zoomed'))  
 
         self.current_buttons = []
@@ -73,12 +92,10 @@ class UltraMediaCenter(ctk.CTk):
         self.current_frame = None
         self.current_scroll = None
         self.frame_stack = []
-        self.active_frame_name = "main"
 
         # 1. 데이터 로드
         self.data = self.load_data()
 
-        # 각 카테고리 프레임 초기화
         self.frames = {}
         for name in ("main", "movie", "drama", "variety"):
             f = ctk.CTkFrame(self, fg_color="#1A1A1A")
@@ -89,15 +106,13 @@ class UltraMediaCenter(ctk.CTk):
         self.setup_main_menu()
         self.setup_content_pages()
 
-        # 키 바인딩
         self.bind("<Up>", self.on_key)
         self.bind("<Down>", self.on_key)
         self.bind("<Return>", self.on_key)
         self.bind("<space>", self.on_key)
         self.bind("<Escape>", lambda e: self.go_back())
 
-        # 🔥 [버그 수정] 창이 완전히 배치된 직후(100ms 뒤) 메인 화면을 강제로 화면 최상단으로 올림
-        self.after(100, lambda: self.show_frame("main", self.main_buttons))
+        self.show_frame("main", self.main_buttons)
 
     # --- 데이터 처리 메서드 ---
     def get_data_path(self):
@@ -118,168 +133,127 @@ class UltraMediaCenter(ctk.CTk):
             logging.error(f"데이터 로딩 실패: {e}")
             return {"movie": [], "drama": [], "variety": []}
 
-   
-    # 🔄 깃허브 원격 메모장을 실시간으로 읽는 대망의 크롤러 완료 버전!
-    # 🔄 티비룸 전용 깃허브 원격 크롤러 완벽 우회 버전!
     # 🤖 Selenium 브라우저 제어를 통한 무적 차단 우회 크롤링 로직
     def run_crawler_logic(self):
-        # ⚠️ [가장 중요] 주소를 반드시 아래와 같은 raw.githubusercontent.com 형태로 넣어야 합니다!
-        CONFIG_URL = "https://raw.githubusercontent.com/skql089-gksmf0147/tvrom-config/main/config.json"
-        
-        try:
-            # 1. 깃허브에서 실시간으로 규칙과 사이트 주소를 받아옵니다.
-            response = requests.get(CONFIG_URL)
-            rules = response.json()
-            
-            base_url = rules.get("base_url", "https://tvroom13.org") 
-            target_class = rules.get("target_class", "v-item-footer")       
-            title_selector = rules.get("title_selector", ".v-item-title a")   
-            wait_time = rules.get("wait_time", 5)             
-            
-            # 🔥 2. [원격 제어 추가] 카테고리 메뉴 경로도 깃허브에서 읽어오되, 없으면 티비룸 기본 주소를 사용합니다!
-            targets = {
-                "movie": rules.get("path_movie", "/v/movie"),
-                "drama": rules.get("path_drama", "/v/drama"),
-                "variety": rules.get("path_variety", "/v/variety")
-            }
-            
-            logging.info(f"🌐 깃허브 최신 규칙 로드 완료! 주소: {base_url}")
-        except Exception as e:
-            logging.error(f"깃허브 규칙 로드 실패 (기본 안전값 설정): {e}")
-            # 인터넷이 끊겼을 때를 대비한 안전장치 기본값
-            base_url = "https://tvroom13.org" 
-            target_class = "v-item-footer"
-            title_selector = ".v-item-title a"
-            wait_time = 5
-            targets = {
-                "movie": "/v/movie",
-                "drama": "/v/drama",
-                "variety": "/v/variety"
-            }
-
-        # ❌ [주의] 이 아래에 기존에 고정되어 있던 base_url = ... 이나 targets = ... 은 완전히 지워주세요!
+        base_url = "https://tvroom13.org"  # 도메인 변경 시 이 주소만 수정하시면 됩니다.
+        targets = {
+            "movie": "/video/영화/한국/시간순",
+            "drama": "/video/드라마/한국/시간순",
+            "variety": "/video/예능/한국/시간순",
+        }
 
         final_data = {"movie": [], "drama": [], "variety": []}
         
         # 크롬 브라우저 백그라운드(Headless) 실행 설정
         chrome_options = Options()
         chrome_options.add_argument("--headless")  # 창 숨기기
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")  # 화면 안 띄우기
         chrome_options.add_argument("--disable-gpu")
-        
-        # 🔒 [보안 차단 우회] 티비룸 사이트가 우리를 차단하지 못하도록 사람처럼 위장하는 옵션들
-        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        chrome_options.add_argument("lang=ko_KR")
-        chrome_options.add_argument("--ignore-certificate-errors")
-        
-        final_data = {}
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument(
+            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+
         driver = None
         try:
-            from selenium.webdriver.chrome.service import Service
-            from webdriver_manager.chrome import ChromeDriverManager
-            
+            # 크롬 드라이버 자동 다운로드 및 실행
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=chrome_options)
             
             for key, path in targets.items():
                 target_url = base_url + path
+                logging.info(f"Selenium 크롤링 시작 [{key}]: {target_url}")
+                
                 driver.get(target_url)
-                
-                # 🔄 깃허브에서 가져온 대기 시간 적용
-                time.sleep(wait_time) 
-                
+                time.sleep(3.5)  # 웹페이지 동적 로딩 및 차단벽 통과 대기 시간
+
                 soup = BeautifulSoup(driver.page_source, "html.parser")
                 category_items = []
                 
-                # 🔄 깃허브에서 가져온 클래스명 적용
-                cards = soup.find_all('div', class_=target_class) 
+                # HTML 구조에 맞게 a.v-item 추적
+                video_items = soup.find_all("a", class_="v-item")
 
-                for card in cards:
-                    # 🔄 깃허브에서 가져온 태그 규칙 적용
-                    a_tag = card.select_one(title_selector) 
-                    if a_tag:
-                        title = a_tag.get_text(strip=True)
-                        link = a_tag.get('href', '')
-                        if link and not link.startswith('http'):
-                            link = base_url + link
-                        
-                        category_items.append({
-                            "title": title,
-                            "url": link  
-                        })
-                
+                for item in video_items:
+                    # v-item-footer의 data-title 속성에서 제목 추출 (오타 방지용 우선 순위)
+                    footer = item.find("div", class_="v-item-footer")
+                    if footer and "data-title" in footer.attrs:
+                        title = footer["data-title"]
+                    else:
+                        title_tag = item.find("div", class_="v-item-title")
+                        title = title_tag.get_text(strip=True) if title_tag else "제목 없음"
+
+                    # 링크 추출 및 절대경로 변환
+                    link = item.get("href", "")
+                    if link and not link.startswith("http"):
+                        link = base_url + link
+
+                    category_items.append({"title": title, "url": link})
+
                 final_data[key] = category_items
-                time.sleep(2)
+                logging.info(f"[{key}] 카테고리 {len(category_items)}건 수집 완료.")
 
-            with open(self.get_data_path(), 'w', encoding='utf-8') as f:
+            # 모든 카테고리 수집 성공 시 단일 media.json 파일에 저장
+            with open(self.get_data_path(), "w", encoding="utf-8") as f:
                 json.dump(final_data, f, ensure_ascii=False, indent=4)
+            
             return True
+            
         except Exception as e:
-            logging.error(f"티비룸 통합 크롤링 처리 실패: {e}")
+            logging.error(f"Selenium 크롤링 중 최종 에러 발생: {e}")
             return False
         finally:
             if driver:
-                driver.quit()
+                driver.quit()  # 백그라운드 브라우저 반드시 종료
 
     def update_data_event(self):
         def task():
             if self.run_crawler_logic():
-                self.after(0, lambda: self.finish_update("✅ 모든 데이터 우회 갱신 완료!"))
+                self.after(
+                    0, lambda: self.finish_update("✅ 모든 데이터 우회 갱신 완료!")
+                )
             else:
-                self.after(0, lambda: messagebox.showerror("에러", "데이터 우회 갱신 실패\n로그를 확인하세요."))
+                self.after(
+                    0, lambda: messagebox.showerror("에러", "데이터 갱신에 실패했습니다.\n로그(app.log)를 확인하세요.")
+                )
+
         threading.Thread(target=task, daemon=True).start()
 
     def finish_update(self, msg):
         self.data = self.load_data()
         self.setup_content_pages()
-        if self.active_frame_name == "movie":
-            self.current_buttons = self.movie_btns
-        elif self.active_frame_name == "drama":
-            self.current_buttons = self.drama_btns
-        elif self.active_frame_name == "variety":
-            self.current_buttons = self.variety_btns
-        else:
-            self.current_buttons = self.main_buttons
-        self.current_index = 0
-        self.highlight()
         messagebox.showinfo("알림", msg)
 
     # --- UI 구성 로직 ---
     def setup_main_menu(self):
         frame = self.frames["main"]
-        
         ctk.CTkLabel(
             frame,
             text="원하시는 콘텐츠를 선택하세요",
             font=FontConfig.get("main_title"), 
             text_color="white",
-        ).pack(pady=(60, 40))
+        ).pack(pady=40)
 
         self.main_buttons = []
-        
         menu_items = [
-            ("🎬  한국 영화", lambda: self.show_frame("movie", self.movie_btns, self.movie_scr)),
-            ("📺  TV 드라마", lambda: self.show_frame("drama", self.drama_btns, self.drama_scr)),
-            ("🎉  인기 예능", lambda: self.show_frame("variety", self.variety_btns, self.variety_scr)),
-            ("🔄  데이터 갱신", self.update_data_event),
+            ("🎬 한국 영화", lambda: self.show_frame("movie", self.movie_btns, self.movie_scr)),
+            ("📺 TV 드라마", lambda: self.show_frame("drama", self.drama_btns, self.drama_scr)),
+            ("🎉 인기 예능", lambda: self.show_frame("variety", self.variety_btns, self.variety_scr)),
+            ("🔄 데이터 갱신", self.update_data_event),
         ]
 
         for text, cmd in menu_items:
             btn = ctk.CTkButton(
                 frame,
                 text=text,
-                width=850,           
-                height=105,          
+                width=900,
+                height=110,  
                 font=FontConfig.get("main_menu"), 
-                corner_radius=18,    
-                fg_color="#2B2B2B",  
-                text_color="#FFFFFF",
+                corner_radius=20,
+                fg_color="#333333",
                 hover_color="#FF5722",
                 command=cmd,
             )
-            btn.pack(pady=12) 
+            btn.pack(pady=15)
             self.main_buttons.append(btn)
 
     def setup_content_pages(self):
@@ -296,6 +270,7 @@ class UltraMediaCenter(ctk.CTk):
             frame, text=title, font=FontConfig.get("page_title"), text_color="#FF5722"
         ).pack(pady=(30, 15))
         
+        # 스크롤 영역 너비를 화면에 맞게 확장
         scroll = ctk.CTkScrollableFrame(
             frame, width=1200, height=580, fg_color="transparent"
         )
@@ -303,18 +278,20 @@ class UltraMediaCenter(ctk.CTk):
 
         buttons = []
         for item in items:
+            # 🎯 anchor="center" 지정을 통한 완전한 텍스트 정중앙 배치 구현
             btn = ctk.CTkButton(
                 scroll,
-                text=item.get('title', '제목 없음'),        
+                text=item['title'],        
                 height=110,                
                 font=FontConfig.get("list_item"), 
                 anchor="center",           
-                fg_color="#2B2B2B",
-                command=lambda u=item.get('url', ''): self.watch_video(u),
+                fg_color="#333333",
+                command=lambda u=item["url"]: self.watch_video(u),
             )
             btn.pack(fill="x", pady=8, padx=50) 
             buttons.append(btn)
 
+        # 뒤로가기 버튼 정렬
         back = ctk.CTkButton(
             frame,
             text="⬅ 뒤로가기 (ESC)",
@@ -330,26 +307,20 @@ class UltraMediaCenter(ctk.CTk):
 
     # --- 제어 로직 ---
     def show_frame(self, name, buttons, scroll=None):
-        if self.current_frame and self.active_frame_name != name:
-            self.frame_stack.append((self.current_frame, self.current_buttons, self.current_scroll, self.active_frame_name))
+        if self.current_frame:
+            self.frame_stack.append((self.current_frame, self.current_buttons, self.current_scroll))
 
         self.current_frame = self.frames[name]
         self.current_buttons = buttons
         self.current_scroll = scroll
-        self.active_frame_name = name
         self.current_index = 0
-        
-        # 🔥 프레임을 맨 위로 끌어올려 화면에 표시함
         self.current_frame.tkraise()
         self.highlight()
 
     def go_back(self):
         if self.frame_stack:
-            frame, buttons, scroll, name = self.frame_stack.pop()
-            self.current_frame = frame
-            self.current_buttons = buttons
-            self.current_scroll = scroll
-            self.active_frame_name = name
+            frame, buttons, scroll = self.frame_stack.pop()
+            self.current_frame, self.current_buttons, self.current_scroll = frame, buttons, scroll
             self.current_index = 0
             frame.tkraise()
             self.highlight()
@@ -358,14 +329,11 @@ class UltraMediaCenter(ctk.CTk):
         if not self.current_buttons:
             return
         for i, btn in enumerate(self.current_buttons):
-            try:
-                if i == self.current_index:
-                    btn.configure(fg_color="#FF5423", text_color="white")
-                    self.ensure_visible(btn)
-                else:
-                    btn.configure(fg_color="#2B2B2B", text_color="#FFFFFF")
-            except Exception:
-                pass
+            if i == self.current_index:
+                btn.configure(fg_color="#FF5722", text_color="white")
+                self.ensure_visible(btn)
+            else:
+                btn.configure(fg_color="#333333", text_color="#CCCCCC")
 
     def ensure_visible(self, btn):
         if not self.current_scroll:
@@ -398,19 +366,22 @@ class UltraMediaCenter(ctk.CTk):
         self.highlight()
 
     def watch_video(self, url):
-        if not url:
-            return
         def run():
             try:
+                # ⭐ [핵심 수정] 단일 .exe 환경(frozen)일 때와 일반 스크립트 실행일 때의 player 파일 위치 정밀화
                 if getattr(sys, 'frozen', False):
+                    # PyInstaller로 압축이 풀리는 임시 디렉토리 경로 지정
                     base = sys._MEIPASS
                     player = os.path.join(base, "player.exe")
+                    # 만약 임시 폴더 내에 player.exe가 없다면 같은 실행 폴더 내를 차선책으로 탐색
                     if not os.path.exists(player):
                         player = os.path.join(os.path.dirname(sys.executable), "player.exe")
                 else:
+                    # 일반 개발(python ui.py) 실행 환경
                     base = os.path.dirname(os.path.abspath(__file__))
                     player = os.path.join(base, "player.py")
 
+                # 실행 파일 포맷 검사 및 명령어 조립
                 if player.endswith(".exe"):
                     cmd = [player, url, "1"]
                 else:
@@ -427,3 +398,4 @@ class UltraMediaCenter(ctk.CTk):
 if __name__ == "__main__":
     app = UltraMediaCenter()
     app.mainloop()
+
