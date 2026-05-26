@@ -139,12 +139,11 @@ class UltraMediaCenter(ctk.CTk):
         except Exception as e:
             logging.error(f"깃허브 규칙 로드 실패 (기본값 설정): {e}")
             # 인터넷이 끊겼을 때를 대비한 안전장치 기본값
+            base_url = "https://mvking.vip"
             target_class = "video-card"
             title_selector = ".video-title a"
             wait_time = 5
 
-        # --- 아래는 기존 크롤링 로직에 변수를 대입한 모습입니다 ---
-        base_url = "https://mvking.me"
         targets = {
             "movie": "/video/영화/한국/시간순",
             "drama": "/video/드라마/한국/시간순",
