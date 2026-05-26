@@ -1,0 +1,16 @@
+
+
+최종 빌드(PyInstaller) 하실 때 완벽 확인 가이드
+
+1.  player.py 먼저 빌드하기 (현재 폴더에 player.py가 있는 상태에서 입력)
+
+pyinstaller --noconfirm --onefile --console player.py
+
+2.  ui.py와 합쳐서 최종 tvroom.exe 만들기
+
+pyinstaller --noconfirm --onefile --windowed --add-data "dist/player.exe;." --collect-all customtkinter --name "movik" ui.py
+
+*** 기존에 생성된 찌꺼기 폴더 삭제 ***
+
+Remove-Item -Recurse -Force build, dist
+

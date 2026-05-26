@@ -1,0 +1,308 @@
+{
+  "movie": [
+    {
+      "title": "잘 살아보세 (2006)",
+      "thumb": "https://img.bcbc.red/2023/09/18/86d9505717880e903d3c218afed9f5e9.jpg",
+      "video": "https://mvking.net/video/%EC%9E%98-%EC%82%B4%EC%95%84%EB%B3%B4%EC%84%B8-2006"
+    },
+    {
+      "title": "슈가 (2026)",
+      "thumb": "https://img.bcbc.red/2026/03/11/26d7b2c20e623dc6cbb9b2fc89674752.jpg",
+      "video": "https://mvking.net/video/%EC%8A%88%EA%B0%80-2026"
+    },
+    {
+      "title": "누가 붉은 장미를 꺾었나 (1990)",
+      "thumb": "https://img.bcbc.red/2026/03/11/9670390296e1f5ecd908382b49cfe165.jpg",
+      "video": "https://mvking.net/video/%EB%88%84%EA%B0%80-%EB%B6%89%EC%9D%80-%EC%9E%A5%EB%AF%B8%EB%A5%BC-%EA%BA%BE%EC%97%88%EB%82%98-1990"
+    },
+    {
+      "title": "서울의 꿈 (2020)",
+      "thumb": "https://img.bcbc.red/2026/03/11/8657bedad2081f0e9ed4615f3a120700.jpg",
+      "video": "https://mvking.net/video/%EC%84%9C%EC%9A%B8%EC%9D%98-%EA%BF%88-2020"
+    },
+    {
+      "title": "이레 (2018)",
+      "thumb": "https://img.bcbc.red/2026/03/11/579d80e2d71e0759ef5fe9d8bb3b11cc.jpg",
+      "video": "https://mvking.net/video/%EC%9D%B4%EB%A0%88-2018"
+    },
+    {
+      "title": "달콤한 인생 (2005)",
+      "thumb": "https://img.bcbc.red/2023/07/19/b422ddae71a1baf74f3f494f22beadd0.jpg",
+      "video": "https://mvking.net/video/%EB%8B%AC%EC%BD%A4%ED%95%9C-%EC%9D%B8%EC%83%9D-2005"
+    },
+    {
+      "title": "남과 여 (2016)",
+      "thumb": "https://img.bcbc.red/2023/07/23/9f2658c60addbe61eed3f345307190ed.jpg",
+      "video": "https://mvking.net/video/%EB%82%A8%EA%B3%BC-%EC%97%AC-2016"
+    },
+    {
+      "title": "멀고도 가까운 (2025)",
+      "thumb": "https://img.bcbc.red/2026/03/08/067406e22645a3b53777a6e30e75c23f.jpg",
+      "video": "https://mvking.net/video/%EB%A9%80%EA%B3%A0%EB%8F%84-%EA%B0%80%EA%B9%8C%EC%9A%B4-2025"
+    },
+    {
+      "title": "함정 (2015)",
+      "thumb": "https://img.bcbc.red/2023/07/22/45cd61ae53367b7d89946ae61f2e8ba9.jpg",
+      "video": "https://mvking.net/video/%ED%95%A8%EC%A0%95-2015"
+    },
+    {
+      "title": "옥천 (2021)",
+      "thumb": "https://img.bcbc.red/2025/10/11/a7d99f23016e18b01521e9af6af4b352.jpg",
+      "video": "https://mvking.net/video/%EC%98%A5%EC%B2%9C-2021"
+    },
+    {
+      "title": "사마리아 (2004)",
+      "thumb": "https://img.bcbc.red/2023/07/22/a818f3edee3195557222251ab43fd99e.jpg",
+      "video": "https://mvking.net/video/%EC%82%AC%EB%A7%88%EB%A6%AC%EC%95%84-2004"
+    },
+    {
+      "title": "나의 제주 에세이 (2024)",
+      "thumb": "https://img.bcbc.red/2026/03/06/666140ec00a9d9bf3fe280d0cb860407.jpg",
+      "video": "https://mvking.net/video/%EB%82%98%EC%9D%98-%EC%A0%9C%EC%A3%BC-%EC%97%90%EC%84%B8%EC%9D%B4-2024"
+    },
+    {
+      "title": "진짜 진짜 잊지마 (1976)",
+      "thumb": "https://img.bcbc.red/2026/03/06/525d3e3f4e984167de3965cc1e92d3f7.jpg",
+      "video": "https://mvking.net/video/%EC%A7%84%EC%A7%9C-%EC%A7%84%EC%A7%9C-%EC%9E%8A%EC%A7%80%EB%A7%88-1976"
+    },
+    {
+      "title": "내 마음의 풍금 (1999)",
+      "thumb": "https://img.bcbc.red/2023/07/29/648fd4d2b6441c9646e454adefc3ba32.jpg",
+      "video": "https://mvking.net/video/%EB%82%B4-%EB%A7%88%EC%9D%8C%EC%9D%98-%ED%92%8D%EA%B8%88-1999"
+    },
+    {
+      "title": "누군가의 꿈 (2025)",
+      "thumb": "https://img.bcbc.red/2026/03/05/f9fe331a39755475193dc8ef8bb0f9db.jpg",
+      "video": "https://mvking.net/video/%EB%88%84%EA%B5%B0%EA%B0%80%EC%9D%98-%EA%BF%88-2025"
+    },
+    {
+      "title": "프리즘 오브 그레이 락 (2025)",
+      "thumb": "https://img.bcbc.red/2026/03/05/40baaa037a9344f51a1a9da4d06e155d.jpg",
+      "video": "https://mvking.net/video/%ED%94%84%EB%A6%AC%EC%A6%98-%EC%98%A4%EB%B8%8C-%EA%B7%B8%EB%A0%88%EC%9D%B4-%EB%9D%BD-2025"
+    },
+    {
+      "title": "남자사용설명서 (2013)",
+      "thumb": "https://img.bcbc.red/2023/07/23/8f0992c8983507c815fed28ce6836da8.jpg",
+      "video": "https://mvking.net/video/%EB%82%A8%EC%9E%90%EC%82%AC%EC%9A%A9%EC%84%A4%EB%AA%85%EC%84%9C-2013"
+    },
+    {
+      "title": "동에 번쩍 서에 번쩍 (2025)",
+      "thumb": "https://img.bcbc.red/2026/03/04/15b53e86d94ca7ed0c5f334c6cbd7c3c.jpg",
+      "video": "https://mvking.net/video/%EB%8F%99%EC%97%90-%EB%B2%88%EC%A9%8D-%EC%84%9C%EC%97%90-%EB%B2%88%EC%A9%8D-2025"
+    },
+    {
+      "title": "다른 시간 다른 장소 (1983)",
+      "thumb": "https://img.bcbc.red/2026/03/03/6ee4132af06841b0e67a3e7b9809af99.jpg",
+      "video": "https://mvking.net/video/%EB%8B%A4%EB%A5%B8-%EC%8B%9C%EA%B0%84-%EB%8B%A4%EB%A5%B8-%EC%9E%A5%EC%86%8C-1983"
+    },
+    {
+      "title": "아직 지나지 않은 여름 (2019)",
+      "thumb": "https://img.bcbc.red/2026/03/02/dfd118b14f35e95897f126379ce848cf.jpg",
+      "video": "https://mvking.net/video/%EC%95%84%EC%A7%81-%EC%A7%80%EB%82%98%EC%A7%80-%EC%95%8A%EC%9D%80-%EC%97%AC%EB%A6%84-2019"
+    }
+  ],
+  "drama": [
+    {
+      "title": "우주를 줄게 (2026)",
+      "thumb": "https://img.bcbc.red/2026/02/04/d952e571a0eafbe8f69b5bde7a4a8b6a.jpg",
+      "video": "https://mvking.net/video/%EC%9A%B0%EC%A3%BC%EB%A5%BC-%EC%A4%84%EA%B2%8C-2026"
+    },
+    {
+      "title": "마리와 별난 아빠들 (2025)",
+      "thumb": "https://img.bcbc.red/2025/10/13/4abf57dc14adee125b09186446cd2fc6.jpg",
+      "video": "https://mvking.net/video/%EB%A7%88%EB%A6%AC%EC%99%80-%EB%B3%84%EB%82%9C-%EC%95%84%EB%B9%A0%EB%93%A4-2025"
+    },
+    {
+      "title": "붉은 진주 (2026)",
+      "thumb": "https://img.bcbc.red/2026/02/23/3848abe3f35fa6b9aacb051628e94f43.jpg",
+      "video": "https://mvking.net/video/%EB%B6%89%EC%9D%80-%EC%A7%84%EC%A3%BC-2026"
+    },
+    {
+      "title": "첫 번째 남자 (2025)",
+      "thumb": "https://img.bcbc.red/2025/12/15/5e5b6ba306452c48733f214531cffe82.jpg",
+      "video": "https://mvking.net/video/%EC%B2%AB-%EB%B2%88%EC%A7%B8-%EB%82%A8%EC%9E%90-2025"
+    },
+    {
+      "title": "노란 복수초 (2012)",
+      "thumb": "https://img.bcbc.red/2026/03/04/ff85283180628561f5ab4e45254a6cc8.jpg",
+      "video": "https://mvking.net/video/%EB%85%B8%EB%9E%80-%EB%B3%B5%EC%88%98%EC%B4%88-2012"
+    },
+    {
+      "title": "아너- 그녀들의 법정 (2026)",
+      "thumb": "https://img.bcbc.red/2026/02/02/78d8dda5c78ad60044e52e0f107c94d1.jpg",
+      "video": "https://mvking.net/video/%EC%95%84%EB%84%88-%EA%B7%B8%EB%85%80%EB%93%A4%EC%9D%98-%EB%B2%95%EC%A0%95-2026"
+    },
+    {
+      "title": "세이렌 (2026)",
+      "thumb": "https://img.bcbc.red/2026/03/03/ec9e920cdd6cfb9244c5f75da886c31e.jpg",
+      "video": "https://mvking.net/video/%EC%84%B8%EC%9D%B4%EB%A0%8C-2026"
+    },
+    {
+      "title": "블랙 (2017)",
+      "thumb": "https://img.bcbc.red/2023/10/07/38edbeafe64f7ea196c8090f9e2bd5e0.jpg",
+      "video": "https://mvking.net/video/%EB%B8%94%EB%9E%99-2017"
+    },
+    {
+      "title": "미혼남녀의 효율적 만남 (2026)",
+      "thumb": "https://img.bcbc.red/2026/02/28/841b056b02f9bd678e85288ce751b56c.jpg",
+      "video": "https://mvking.net/video/%EB%AF%B8%ED%98%BC%EB%82%A8%EB%85%80%EC%9D%98-%ED%9A%A8%EC%9C%A8%EC%A0%81-%EB%A7%8C%EB%82%A8-2026"
+    },
+    {
+      "title": "사랑을 처방해 드립니다 (2026)",
+      "thumb": "https://img.bcbc.red/2026/01/31/9bc297108036bf498e5c57c8ff887230.jpg",
+      "video": "https://mvking.net/video/%EC%82%AC%EB%9E%91%EC%9D%84-%EC%B2%98%EB%B0%A9%ED%95%B4-%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4-2026"
+    },
+    {
+      "title": "언더커버 미쓰홍 (2026)",
+      "thumb": "https://img.bcbc.red/2026/01/25/80b2402af92ba6e7ad02ca9643befb81.jpg",
+      "video": "https://mvking.net/video/%EC%96%B8%EB%8D%94%EC%BB%A4%EB%B2%84-%EB%AF%B8%EC%93%B0%ED%99%8D-2026"
+    },
+    {
+      "title": "식객 (2008)",
+      "thumb": "https://img.bcbc.red/2026/03/07/4ea2ed65d088c6d109d3bd8ff0dd8d6b.jpg",
+      "video": "https://mvking.net/video/%EC%8B%9D%EA%B0%9D-2008"
+    },
+    {
+      "title": "샤이닝 (2026)",
+      "thumb": "https://img.bcbc.red/2026/03/07/3837a1dcacd5de82baa29c5787c5ef85.jpg",
+      "video": "https://mvking.net/video/%EC%83%A4%EC%9D%B4%EB%8B%9D-2026"
+    },
+    {
+      "title": "러브포비아 (2026)",
+      "thumb": "https://img.bcbc.red/2026/02/20/cb04bdeaaea5a999b1986caa10da51cb.jpg",
+      "video": "https://mvking.net/video/%EB%9F%AC%EB%B8%8C%ED%8F%AC%EB%B9%84%EC%95%84-2026"
+    },
+    {
+      "title": "찬란한 너의 계절에 (2026)",
+      "thumb": "https://img.bcbc.red/2026/02/21/d93c79b0fe4f41edc4063c620cef4125.jpg",
+      "video": "https://mvking.net/video/%EC%B0%AC%EB%9E%80%ED%95%9C-%EB%84%88%EC%9D%98-%EA%B3%84%EC%A0%88%EC%97%90-2026"
+    },
+    {
+      "title": "태양의 후예 (2016)",
+      "thumb": "https://img.bcbc.red/2023/09/21/10435cfd44155a205a32bc75c25b9e43.jpg",
+      "video": "https://mvking.net/video/%ED%83%9C%EC%96%91%EC%9D%98-%ED%9B%84%EC%98%88-2016"
+    },
+    {
+      "title": "월간남친 (2026)",
+      "thumb": "https://img.bcbc.red/2026/03/06/5677a3cf16f0610bb5dd4f0461ed91dd.jpg",
+      "video": "https://mvking.net/video/%EC%9B%94%EA%B0%84%EB%82%A8%EC%B9%9C-2026"
+    },
+    {
+      "title": "로맨스가 필요해 시즌1 (2011)",
+      "thumb": "https://img.bcbc.red/2026/02/03/a86c3ed956f6a18c004ba49a4f55e7b7.jpg",
+      "video": "https://mvking.net/video/%EB%A1%9C%EB%A7%A8%EC%8A%A4%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%B4-%EC%8B%9C%EC%A6%8C1-2011"
+    },
+    {
+      "title": "인 유어 드림 (2025)",
+      "thumb": "https://img.bcbc.red/2026/03/06/b80c172b887b01722ba65221b3fb8361.jpg",
+      "video": "https://mvking.net/video/%EC%9D%B8-%EC%9C%A0%EC%96%B4-%EB%93%9C%EB%A6%BC-2025-1"
+    },
+    {
+      "title": "장희빈 (2002)",
+      "thumb": "https://img.bcbc.red/2025/09/19/13c02f652373ac4f62ae4881702caec3.jpg",
+      "video": "https://mvking.net/video/%EC%9E%A5%ED%9D%AC%EB%B9%88-2002"
+    }
+  ],
+  "variety": [
+    {
+      "title": "이야기쇼 두드림",
+      "thumb": "https://img.bcbc.red/2026/03/03/3db93b050f3bbf3cd7c91d93df06db1c.jpg",
+      "video": "https://mvking.net/video/%EC%9D%B4%EC%95%BC%EA%B8%B0%EC%87%BC-%EB%91%90%EB%93%9C%EB%A6%BC"
+    },
+    {
+      "title": "70억의 선택",
+      "thumb": "https://img.bcbc.red/2026/01/24/9501fc98975c67b015b10aaac277bdc6.jpg",
+      "video": "https://mvking.net/video/70%EC%96%B5%EC%9D%98-%EC%84%A0%ED%83%9D"
+    },
+    {
+      "title": "서장훈의 이웃집 백만장자 시즌2",
+      "thumb": "https://img.bcbc.red/2025/09/19/74811a66bd7e37dce82e3c075d9b89f3.jpg",
+      "video": "https://mvking.net/video/%EC%84%9C%EC%9E%A5%ED%9B%88%EC%9D%98-%EC%9D%B4%EC%9B%83%EC%A7%91-%EB%B0%B1%EB%A7%8C%EC%9E%A5%EC%9E%90-%EC%8B%9C%EC%A6%8C2"
+    },
+    {
+      "title": "웰컴 투 스포츠",
+      "thumb": "https://img.bcbc.red/2025/02/05/0f64df5658b1bdf9f25dba121ad17fbb.jpg",
+      "video": "https://mvking.net/video/%EC%9B%B0%EC%BB%B4-%ED%88%AC-%EC%8A%A4%ED%8F%AC%EC%B8%A0"
+    },
+    {
+      "title": "무명전설",
+      "thumb": "https://img.bcbc.red/2026/02/26/1d79480ca50a2e624b433ca9770380b8.jpg",
+      "video": "https://mvking.net/video/%EB%AC%B4%EB%AA%85%EC%A0%84%EC%84%A4"
+    },
+    {
+      "title": "나는 SOLO",
+      "thumb": "https://img.bcbc.red/2023/08/17/fbd1d3c67ebc9eddd0b19fe01cf90001.jpg",
+      "video": "https://mvking.net/video/%EB%82%98%EB%8A%94-solo"
+    },
+    {
+      "title": "괴담노트 시즌2 - 만신전의 기록",
+      "thumb": "https://img.bcbc.red/2025/12/25/579626bb7809958cd4efe9281c0a764c.jpg",
+      "video": "https://mvking.net/video/%EA%B4%B4%EB%8B%B4%EB%85%B8%ED%8A%B8-%EC%8B%9C%EC%A6%8C2-%EB%A7%8C%EC%8B%A0%EC%A0%84%EC%9D%98-%EA%B8%B0%EB%A1%9D"
+    },
+    {
+      "title": "아빠하고 나하고",
+      "thumb": "https://img.bcbc.red/2023/12/07/ff71f7f80f8791472ce76085827fe067.JPG",
+      "video": "https://mvking.net/video/%EC%95%84%EB%B9%A0%ED%95%98%EA%B3%A0-%EB%82%98%ED%95%98%EA%B3%A0"
+    },
+    {
+      "title": "라디오 스타",
+      "thumb": "https://img.bcbc.red/2023/08/05/271eb42a7a1c52160eacc8085eb88001.jpg",
+      "video": "https://mvking.net/video/%EB%9D%BC%EB%94%94%EC%98%A4-%EC%8A%A4%ED%83%80"
+    },
+    {
+      "title": "개와 늑대의 시간 시즌2",
+      "thumb": "https://img.bcbc.red/2026/01/08/06db8e1eed1f443b7a4e2117b49f66df.jpg",
+      "video": "https://mvking.net/video/%EA%B0%9C%EC%99%80-%EB%8A%91%EB%8C%80%EC%9D%98-%EC%8B%9C%EA%B0%84-%EC%8B%9C%EC%A6%8C2"
+    },
+    {
+      "title": "한문철의 블랙박스 리뷰 (한블리)",
+      "thumb": "https://img.bcbc.red/2023/08/04/e5c0fd81ba8e1b87aed0fe62fcc73482.jpg",
+      "video": "https://mvking.net/video/%ED%95%9C%EB%AC%B8%EC%B2%A0%EC%9D%98-%EB%B8%94%EB%9E%99%EB%B0%95%EC%8A%A4-%EB%A6%AC%EB%B7%B0-%ED%95%9C%EB%B8%94%EB%A6%AC"
+    },
+    {
+      "title": "유 퀴즈 온 더 블럭 시즌3",
+      "thumb": "https://img.bcbc.red/2023/08/05/e3c8e9049645387fd823af2496316924.jpg",
+      "video": "https://mvking.net/video/%EC%9C%A0-%ED%80%B4%EC%A6%88-%EC%98%A8-%EB%8D%94-%EB%B8%94%EB%9F%AD-%EC%8B%9C%EC%A6%8C3"
+    },
+    {
+      "title": "슈퍼맨이 돌아왔다",
+      "thumb": "https://img.bcbc.red/2023/08/16/15afca2c236ffca1e0008a40996c43b7.jpg",
+      "video": "https://mvking.net/video/%EC%8A%88%ED%8D%BC%EB%A7%A8%EC%9D%B4-%EB%8F%8C%EC%95%84%EC%99%94%EB%8B%A4"
+    },
+    {
+      "title": "황신혜의 같이 삽시다",
+      "thumb": "https://img.bcbc.red/2026/01/07/9f2c155823699cb3fdd1e5140163f6a3.jpg",
+      "video": "https://mvking.net/video/%ED%99%A9%EC%8B%A0%ED%98%9C%EC%9D%98-%EA%B0%99%EC%9D%B4-%EC%82%BD%EC%8B%9C%EB%8B%A4"
+    },
+    {
+      "title": "골 때리는 그녀들",
+      "thumb": "https://img.bcbc.red/2023/08/17/e9682c6a3a7ad88036c09426538b4658.jpg",
+      "video": "https://mvking.net/video/%EA%B3%A8-%EB%95%8C%EB%A6%AC%EB%8A%94-%EA%B7%B8%EB%85%80%EB%93%A4"
+    },
+    {
+      "title": "내 새끼의 연애2",
+      "thumb": "https://img.bcbc.red/2026/02/26/c049e7e7a2785085da287c943ddfe9fe.jpg",
+      "video": "https://mvking.net/video/%EB%82%B4-%EC%83%88%EB%81%BC%EC%9D%98-%EC%97%B0%EC%95%A02"
+    },
+    {
+      "title": "데스게임- 천만원을 걸어라",
+      "thumb": "https://img.bcbc.red/2026/01/28/4c4ff5d227e269a9d94ba73bf6978f0e.jpg",
+      "video": "https://mvking.net/video/%EB%8D%B0%EC%8A%A4%EA%B2%8C%EC%9E%84-%EC%B2%9C%EB%A7%8C%EC%9B%90%EC%9D%84-%EA%B1%B8%EC%96%B4%EB%9D%BC"
+    },
+    {
+      "title": "미스터리 음악쇼 복면가왕",
+      "thumb": "https://img.bcbc.red/2023/08/18/bbf0a42983bfd793de2150d5b2aef521.jpg",
+      "video": "https://mvking.net/video/%EB%AF%B8%EC%8A%A4%ED%84%B0%EB%A6%AC-%EC%9D%8C%EC%95%85%EC%87%BC-%EB%B3%B5%EB%A9%B4%EA%B0%80%EC%99%95"
+    },
+    {
+      "title": "괴담콜렉터",
+      "thumb": "https://img.bcbc.red/2026/03/10/03b6e3cec4e6f5af16a409ec2cf69728.jpg",
+      "video": "https://mvking.net/video/%EA%B4%B4%EB%8B%B4%EC%BD%9C%EB%A0%89%ED%84%B0"
+    },
+    {
+      "title": "현역가왕3",
+      "thumb": "https://img.bcbc.red/2026/01/21/2c793fd9c0dffc3a4805d32412f404bf.jpg",
+      "video": "https://mvking.net/video/%ED%98%84%EC%97%AD%EA%B0%80%EC%99%953"
+    }
+  ]
+}

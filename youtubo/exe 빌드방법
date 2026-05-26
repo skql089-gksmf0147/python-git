@@ -1,0 +1,16 @@
+🔁 전체 업데이트 흐름 (정확한 순서)
+
+1️⃣ 코드 수정 
+youtubo\
+      └─ main.py   ← 여기서 수정
+
+2️⃣ exe 빌드 ffmpeg 포함
+pyinstaller --onefile --noconsole --add-binary "ffmpeg.exe;." main.py
+
+    ffmpeg 미포함
+pyinstaller --onefile --noconsole main.py
+
+결과:
+
+dist\
+ └─ main.exe   

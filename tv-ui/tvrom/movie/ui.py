@@ -1,0 +1,380 @@
+import json
+import logging
+import os
+import subprocess
+import sys
+import threading
+import time
+from tkinter import messagebox
+from bs4 import BeautifulSoup
+import customtkinter as ctk
+
+# Selenium 관련 라이브러리 추가
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
+# =====================================================================
+# 📺 [TV 전용 폰트 제어 설정] - 여기서 크기와 패밀리를 자유롭게 수정하세요!
+# =====================================================================
+class FontConfig:
+    FONT_FAMILY = "NanumGothic"
+    
+    # 폰트 크기 정의
+    SIZE_MAIN_TITLE = 55  # 메인 화면 최상단 타이틀
+    SIZE_PAGE_TITLE = 50  # 카테고리 페이지 상단 타이틀
+    SIZE_LIST_ITEM  = 45  # 기존 타이틀급으로 키운 카테고리 목록 폰트
+    SIZE_MAIN_MENU  = 40  # 메인 메뉴 버튼 폰트
+    SIZE_BACK_BTN   = 35  # 뒤로가기 버튼 폰트
+
+    @classmethod
+    def get(cls, style_type):
+        if style_type == "main_title":
+            return (cls.FONT_FAMILY, cls.SIZE_MAIN_TITLE, "bold")
+        elif style_type == "page_title":
+            return (cls.FONT_FAMILY, cls.SIZE_PAGE_TITLE, "bold")
+        elif style_type == "list_item":
+            return (cls.FONT_FAMILY, cls.SIZE_LIST_ITEM, "bold")  
+        elif style_type == "main_menu":
+            return (cls.FONT_FAMILY, cls.SIZE_MAIN_MENU, "bold")
+        elif style_type == "back_btn":
+            return (cls.FONT_FAMILY, cls.SIZE_BACK_BTN, "bold")
+        return (cls.FONT_FAMILY, 20)
+
+# --- 전역 설정 및 로그 ---
+log_path = os.path.join(
+    os.path.dirname(sys.executable if getattr(sys, "frozen", False) else __file__),
+    "app.log",
+)
+logging.basicConfig(
+    filename=log_path,
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    encoding="utf-8",
+)
+
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
+
+
+class UltraMediaCenter(ctk.CTk):
+
+    def __init__(self):
+        super().__init__()
+        self.title("ULTRA 미디어 센터")
+        
+        # 📺 실행 시 윈도우 창을 전체 화면(Maximized)으로 고정합니다.
+        self.after(0, lambda: self.wm_state('zoomed'))  
+
+        self.current_buttons = []
+        self.current_index = 0
+        self.current_frame = None
+        self.current_scroll = None
+        self.frame_stack = []
+
+        # 1. 데이터 로드
+        self.data = self.load_data()
+
+        self.frames = {}
+        for name in ("main", "movie", "drama", "variety"):
+            f = ctk.CTkFrame(self, fg_color="#1A1A1A")
+            f.place(x=0, y=0, relwidth=1, relheight=1)
+            self.frames[name] = f
+
+        # 2. UI 구성
+        self.setup_main_menu()
+        self.setup_content_pages()
+
+        self.bind("<Up>", self.on_key)
+        self.bind("<Down>", self.on_key)
+        self.bind("<Return>", self.on_key)
+        self.bind("<space>", self.on_key)
+        self.bind("<Escape>", lambda e: self.go_back())
+
+        self.show_frame("main", self.main_buttons)
+
+    # --- 데이터 처리 메서드 ---
+    def get_data_path(self):
+        if getattr(sys, "frozen", False):
+            return os.path.join(os.path.dirname(sys.executable), "media.json")
+        return os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "media.json"
+        )
+
+    def load_data(self):
+        path = self.get_data_path()
+        if not os.path.exists(path):
+            return {"movie": [], "drama": [], "variety": []}
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            logging.error(f"데이터 로딩 실패: {e}")
+            return {"movie": [], "drama": [], "variety": []}
+
+    # 🤖 Selenium 브라우저 제어를 통한 무적 차단 우회 크롤링 로직
+    def run_crawler_logic(self):
+        base_url = "https://tvroom13.org"  # 도메인 변경 시 이 주소만 수정하시면 됩니다.
+        targets = {
+            "movie": "/video/영화/한국/시간순",
+            "drama": "/video/드라마/한국/시간순",
+            "variety": "/video/예능/한국/시간순",
+        }
+
+        final_data = {"movie": [], "drama": [], "variety": []}
+        
+        # 크롬 브라우저 백그라운드(Headless) 실행 설정
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # 창 숨기기
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument(
+            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+
+        driver = None
+        try:
+            # 크롬 드라이버 자동 다운로드 및 실행
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            
+            for key, path in targets.items():
+                target_url = base_url + path
+                logging.info(f"Selenium 크롤링 시작 [{key}]: {target_url}")
+                
+                driver.get(target_url)
+                time.sleep(3.5)  # 웹페이지 동적 로딩 및 차단벽 통과 대기 시간
+
+                soup = BeautifulSoup(driver.page_source, "html.parser")
+                category_items = []
+                
+                # HTML 구조에 맞게 a.v-item 추적
+                video_items = soup.find_all("a", class_="v-item")
+
+                for item in video_items:
+                    # v-item-footer의 data-title 속성에서 제목 추출 (오타 방지용 우선 순위)
+                    footer = item.find("div", class_="v-item-footer")
+                    if footer and "data-title" in footer.attrs:
+                        title = footer["data-title"]
+                    else:
+                        title_tag = item.find("div", class_="v-item-title")
+                        title = title_tag.get_text(strip=True) if title_tag else "제목 없음"
+
+                    # 링크 추출 및 절대경로 변환
+                    link = item.get("href", "")
+                    if link and not link.startswith("http"):
+                        link = base_url + link
+
+                    category_items.append({"title": title, "url": link})
+
+                final_data[key] = category_items
+                logging.info(f"[{key}] 카테고리 {len(category_items)}건 수집 완료.")
+
+            # 모든 카테고리 수집 성공 시 단일 media.json 파일에 저장
+            with open(self.get_data_path(), "w", encoding="utf-8") as f:
+                json.dump(final_data, f, ensure_ascii=False, indent=4)
+            
+            return True
+            
+        except Exception as e:
+            logging.error(f"Selenium 크롤링 중 최종 에러 발생: {e}")
+            return False
+        finally:
+            if driver:
+                driver.quit()  # 백그라운드 브라우저 반드시 종료
+
+    def update_data_event(self):
+        def task():
+            if self.run_crawler_logic():
+                self.after(
+                    0, lambda: self.finish_update("✅ 모든 데이터 우회 갱신 완료!")
+                )
+            else:
+                self.after(
+                    0, lambda: messagebox.showerror("에러", "데이터 갱신에 실패했습니다.\n로그(app.log)를 확인하세요.")
+                )
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def finish_update(self, msg):
+        self.data = self.load_data()
+        self.setup_content_pages()
+        messagebox.showinfo("알림", msg)
+
+    # --- UI 구성 로직 ---
+    def setup_main_menu(self):
+        frame = self.frames["main"]
+        ctk.CTkLabel(
+            frame,
+            text="원하시는 콘텐츠를 선택하세요",
+            font=FontConfig.get("main_title"), 
+            text_color="white",
+        ).pack(pady=40)
+
+        self.main_buttons = []
+        menu_items = [
+            ("🎬 한국 영화", lambda: self.show_frame("movie", self.movie_btns, self.movie_scr)),
+            ("📺 TV 드라마", lambda: self.show_frame("drama", self.drama_btns, self.drama_scr)),
+            ("🎉 인기 예능", lambda: self.show_frame("variety", self.variety_btns, self.variety_scr)),
+            ("🔄 데이터 갱신", self.update_data_event),
+        ]
+
+        for text, cmd in menu_items:
+            btn = ctk.CTkButton(
+                frame,
+                text=text,
+                width=900,
+                height=110,  
+                font=FontConfig.get("main_menu"), 
+                corner_radius=20,
+                fg_color="#333333",
+                hover_color="#FF5722",
+                command=cmd,
+            )
+            btn.pack(pady=15)
+            self.main_buttons.append(btn)
+
+    def setup_content_pages(self):
+        self.movie_btns, self.movie_scr = self.create_list_page("movie", "🎬 한국 영화", self.data.get("movie", []))
+        self.drama_btns, self.drama_scr = self.create_list_page("drama", "📺 TV 드라마", self.data.get("drama", []))
+        self.variety_btns, self.variety_scr = self.create_list_page("variety", "🎉 인기 예능", self.data.get("variety", []))
+
+    def create_list_page(self, name, title, items):
+        frame = self.frames[name]
+        for widget in frame.winfo_children():
+            widget.destroy()
+
+        ctk.CTkLabel(
+            frame, text=title, font=FontConfig.get("page_title"), text_color="#FF5722"
+        ).pack(pady=(30, 15))
+        
+        # 스크롤 영역 너비를 화면에 맞게 확장
+        scroll = ctk.CTkScrollableFrame(
+            frame, width=1200, height=580, fg_color="transparent"
+        )
+        scroll.pack(expand=True, fill="both", padx=60, pady=5)
+
+        buttons = []
+        for item in items:
+            # 🎯 anchor="center" 지정을 통한 완전한 텍스트 정중앙 배치 구현
+            btn = ctk.CTkButton(
+                scroll,
+                text=item['title'],        
+                height=110,                
+                font=FontConfig.get("list_item"), 
+                anchor="center",           
+                fg_color="#333333",
+                command=lambda u=item["url"]: self.watch_video(u),
+            )
+            btn.pack(fill="x", pady=8, padx=50) 
+            buttons.append(btn)
+
+        # 뒤로가기 버튼 정렬
+        back = ctk.CTkButton(
+            frame,
+            text="⬅ 뒤로가기 (ESC)",
+            width=600,
+            height=85,
+            font=FontConfig.get("back_btn"), 
+            fg_color="#444444",
+            command=self.go_back,
+        )
+        back.pack(pady=20)
+        buttons.append(back)
+        return buttons, scroll
+
+    # --- 제어 로직 ---
+    def show_frame(self, name, buttons, scroll=None):
+        if self.current_frame:
+            self.frame_stack.append((self.current_frame, self.current_buttons, self.current_scroll))
+
+        self.current_frame = self.frames[name]
+        self.current_buttons = buttons
+        self.current_scroll = scroll
+        self.current_index = 0
+        self.current_frame.tkraise()
+        self.highlight()
+
+    def go_back(self):
+        if self.frame_stack:
+            frame, buttons, scroll = self.frame_stack.pop()
+            self.current_frame, self.current_buttons, self.current_scroll = frame, buttons, scroll
+            self.current_index = 0
+            frame.tkraise()
+            self.highlight()
+
+    def highlight(self):
+        if not self.current_buttons:
+            return
+        for i, btn in enumerate(self.current_buttons):
+            if i == self.current_index:
+                btn.configure(fg_color="#FF5722", text_color="white")
+                self.ensure_visible(btn)
+            else:
+                btn.configure(fg_color="#333333", text_color="#CCCCCC")
+
+    def ensure_visible(self, btn):
+        if not self.current_scroll:
+            return
+        try:
+            self.update_idletasks()
+            canvas = self.current_scroll._parent_canvas
+            total_h = canvas.bbox("all")[3]
+            canvas_h = canvas.winfo_height()
+            if total_h > canvas_h:
+                cur_top, cur_bottom = canvas.yview()
+                btn_top = btn.winfo_y() / total_h
+                btn_bottom = (btn.winfo_y() + btn.winfo_height()) / total_h
+                if btn_top < cur_top:
+                    canvas.yview_moveto(btn_top)
+                elif btn_bottom > cur_bottom:
+                    canvas.yview_moveto(btn_bottom - (canvas_h / total_h))
+        except:
+            pass
+
+    def on_key(self, event):
+        if not self.current_buttons:
+            return
+        if event.keysym == "Up":
+            self.current_index = max(0, self.current_index - 1)
+        elif event.keysym == "Down":
+            self.current_index = min(len(self.current_buttons) - 1, self.current_index + 1)
+        elif event.keysym in ("Return", "space"):
+            self.current_buttons[self.current_index].invoke()
+        self.highlight()
+
+    def watch_video(self, url):
+        def run():
+            try:
+                # ⭐ [핵심 수정] 단일 .exe 환경(frozen)일 때와 일반 스크립트 실행일 때의 player 파일 위치 정밀화
+                if getattr(sys, 'frozen', False):
+                    # PyInstaller로 압축이 풀리는 임시 디렉토리 경로 지정
+                    base = sys._MEIPASS
+                    player = os.path.join(base, "player.exe")
+                    # 만약 임시 폴더 내에 player.exe가 없다면 같은 실행 폴더 내를 차선책으로 탐색
+                    if not os.path.exists(player):
+                        player = os.path.join(os.path.dirname(sys.executable), "player.exe")
+                else:
+                    # 일반 개발(python ui.py) 실행 환경
+                    base = os.path.dirname(os.path.abspath(__file__))
+                    player = os.path.join(base, "player.py")
+
+                # 실행 파일 포맷 검사 및 명령어 조립
+                if player.endswith(".exe"):
+                    cmd = [player, url, "1"]
+                else:
+                    cmd = [sys.executable, player, url, "1"]
+
+                logging.info(f"동영상 재생 시도 경로: {player}")
+                subprocess.Popen(cmd)
+            except Exception as e:
+                logging.error(f"재생 에러: {e}")
+
+        threading.Thread(target=run, daemon=True).start()
+
+
+if __name__ == "__main__":
+    app = UltraMediaCenter()
+    app.mainloop()
