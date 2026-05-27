@@ -7,6 +7,7 @@ import threading
 import time
 from tkinter import messagebox
 import customtkinter as ctk
+import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -21,7 +22,6 @@ from selenium.webdriver.chrome.options import Options
 class FontConfig:
     FONT_FAMILY = "NanumGothic"
     
-    # 폰트 크기 정의
     SIZE_MAIN_TITLE = 55  # 메인 화면 최상단 타이틀
     SIZE_PAGE_TITLE = 50  # 카테고리 페이지 상단 타이틀
     SIZE_LIST_ITEM  = 45  # 카테고리 목록 폰트
@@ -62,7 +62,7 @@ class UltraMediaCenter(ctk.CTk):
 
     def __init__(self):
         super().__init__()
-        self.title("ULTRA 미디어 센터")
+        self.title("MOVIK 미디어 센터")
         
         # 📺 실행 시 윈도우 창을 전체 화면으로 고정
         self.after(0, lambda: self.wm_state('zoomed'))  
@@ -95,7 +95,6 @@ class UltraMediaCenter(ctk.CTk):
         self.bind("<space>", self.on_key)
         self.bind("<Escape>", lambda e: self.go_back())
 
-        # 🔥 [버그 수정] 창이 완전히 배치된 직후(100ms 뒤) 메인 화면을 강제로 화면 최상단으로 올림
         self.after(100, lambda: self.show_frame("main", self.main_buttons))
 
     # --- 데이터 처리 메서드 ---
@@ -117,70 +116,99 @@ class UltraMediaCenter(ctk.CTk):
             logging.error(f"데이터 로딩 실패: {e}")
             return {"movie": [], "drama": [], "variety": []}
 
-    # 🔄 무비킹 video-card 태그 파싱 구조 (자동 드라이버 및 보안 우회 강화 버전)
+    # 🔄 [핵심 수정한 부분] 무비킹 / 티비룸 스마트 자동 판단 크롤러
     def run_crawler_logic(self):
-        base_url = "https://mvking.me"
-        targets = {
-            "movie": "/video/영화/한국/시간순",
-            "drama": "/video/드라마/한국/시간순",
-            "variety": "/video/예능/한국/시간순"  
-        }
+        # 내 깃허브 원격 주소 (만약 깃허브 저장소 이름이 다르면 이 부분 주소만 내가 쓰는 저장소명으로 고치면 됩니다!)
+        CONFIG_URL = "https://raw.githubusercontent.com/skql089-gksmf0147/media-config/main/config.json"
         
+        try:
+            response = requests.get(CONFIG_URL, timeout=5)
+            rules = response.json()
+            
+            base_url = rules.get("base_url", "https://mvking.vip/")
+            target_class = rules.get("target_class", "video-card")       
+            title_selector = rules.get("title_selector", ".video-title a")   
+            wait_time = rules.get("wait_time", 5)             
+            
+            targets = {
+                "movie": rules.get("path_movie", "/video/영화/한국/시간순"),
+                "drama": rules.get("path_drama", "/video/드라마/한국/시간순"),
+                "variety": rules.get("path_variety", "/video/예능/한국/시간순")
+            }
+            logging.info(f"🌐 깃허브 최신 규칙 로드 완료! 대상 주소: {base_url}")
+        except Exception as e:
+            logging.error(f"깃허브 규칙 로드 실패 (안전 기본값 적용): {e}")
+            base_url = "https://mvking.vip/"
+            target_class = "video-card"
+            title_selector = ".video-title a"
+            wait_time = 5
+            targets = {"movie": "/video/영화/한국/시간순", "drama": "/video/드라마/한국/시간순", "variety": "/video/예능/한국/시간순"}
+
+        # 사이트 형태 진단 (티비룸인가 무비킹인가?)
+        is_tvroom = "tvroom" in base_url
+        logging.info(f"현재 접속 모드 판정 -> 티비룸인가요?: {is_tvroom}")
+
         chrome_options = Options()
         chrome_options.add_argument("--headless")  
         chrome_options.add_argument("--disable-gpu")
-        # 보안 필터 우회를 위한 옵션 추가
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled") 
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        chrome_options.add_experimental_option('useAutomationExtension', False)
-        chrome_options.add_argument(
-            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
-        )
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_argument("lang=ko_KR")
+        chrome_options.add_argument("--ignore-certificate-errors")
         
-        final_data = {}
+        final_data = {"movie": [], "drama": [], "variety": []}
         driver = None
         try:
-            # 🔥 [핵심 수정] 현재 PC 크롬 버전에 맞는 드라이버를 자동으로 다운로드 및 실행
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=chrome_options)
             
-            # 셀레니움 감지 우회 스크립트 실행
-            driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-                "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
-            })
-
             for key, path in targets.items():
-                target_url = base_url + path
-                logging.info(f"[{key}] 셀레니움 우회 접근 중: {target_url}")
+                target_url = f"{base_url.rstrip('/')}{path}"
+                logging.info(f"크롤링 수집 진행 중 [{key}]: {target_url}")
                 driver.get(target_url)
-                time.sleep(5) # 차단 방지를 위해 대기 시간을 조금 더 여유롭게 조정
+                time.sleep(wait_time) 
                 
                 soup = BeautifulSoup(driver.page_source, "html.parser")
                 category_items = []
-                cards = soup.find_all('div', class_='video-card')
-
-                for card in cards:
-                    a_tag = card.select_one('.video-title a')
-                    if a_tag:
-                        title = a_tag.get_text(strip=True)
-                        link = a_tag.get('href', '')
-                        if link and not link.startswith('http'):
-                            link = base_url + link
-                        
-                        category_items.append({
-                            "title": title,
-                            "url": link  
-                        })
                 
+                if is_tvroom:
+                    # ─────────────── 1. 티비룸 수집 공식 ───────────────
+                    video_items = soup.find_all("a", class_=target_class)
+                    for item in video_items:
+                        footer = item.find("div", class_="v-item-footer")
+                        if footer and "data-title" in footer.attrs:
+                            title = footer["data-title"]
+                        else:
+                            title_tag = item.find("div", class_="v-item-title")
+                            title = title_tag.get_text(strip=True) if title_tag else "제목 없음"
+                        
+                        link = item.get('href', '')
+                        if link and not link.startswith('http'):
+                            link = f"{base_url.rstrip('/')}{link}"
+                        category_items.append({"title": title, "url": link})
+                else:
+                    # ─────────────── 2. 무비킹 수집 공식 ───────────────
+                    cards = soup.find_all('div', class_=target_class)
+                    for card in cards:
+                        a_tag = card.select_one(title_selector)
+                        if a_tag:
+                            title = a_tag.get_text(strip=True)
+                            link = a_tag.get('href', '')
+                            if link and not link.startswith('http'):
+                                link = f"{base_url.rstrip('/')}{link}"
+                            category_items.append({"title": title, "url": link})
+             
                 final_data[key] = category_items
-                logging.info(f"✅ [{key}] 갱신 성공 - 수집 개수: {len(category_items)}건")
+                logging.info(f"[{key}] 카테고리 {len(category_items)}건 수집 완료.")
                 time.sleep(2)
 
             with open(self.get_data_path(), 'w', encoding='utf-8') as f:
                 json.dump(final_data, f, ensure_ascii=False, indent=4)
             return True
         except Exception as e:
-            logging.error(f"무비킹 통합 크롤링 처리 실패: {e}")
+            logging.error(f"통합 크롤링 처리 실패: {e}")
             return False
         finally:
             if driver:
@@ -191,7 +219,7 @@ class UltraMediaCenter(ctk.CTk):
             if self.run_crawler_logic():
                 self.after(0, lambda: self.finish_update("✅ 모든 데이터 우회 갱신 완료!"))
             else:
-                self.after(0, lambda: messagebox.showerror("에러", "데이터 우회 갱신 실패\n로그를 확인하세요."))
+                self.after(0, lambda: messagebox.showerror("에러", "데이터 우회 갱신 실패\n로그(app.log)를 확인하세요."))
         threading.Thread(target=task, daemon=True).start()
 
     def finish_update(self, msg):
@@ -212,7 +240,6 @@ class UltraMediaCenter(ctk.CTk):
     # --- UI 구성 로직 ---
     def setup_main_menu(self):
         frame = self.frames["main"]
-        
         ctk.CTkLabel(
             frame,
             text="원하시는 콘텐츠를 선택하세요",
@@ -221,28 +248,26 @@ class UltraMediaCenter(ctk.CTk):
         ).pack(pady=(60, 40))
 
         self.main_buttons = []
-        
         menu_items = [
-            ("🎬  한국 영화", lambda: self.show_frame("movie", self.movie_btns, self.movie_scr)),
-            ("📺  TV 드라마", lambda: self.show_frame("drama", self.drama_btns, self.drama_scr)),
-            ("🎉  인기 예능", lambda: self.show_frame("variety", self.variety_btns, self.variety_scr)),
-            ("🔄  데이터 갱신", self.update_data_event),
+            ("🎬 한국 영화", lambda: self.show_frame("movie", self.movie_btns, self.movie_scr)),
+            ("📺 TV 드라마", lambda: self.show_frame("drama", self.drama_btns, self.drama_scr)),
+            ("🎉 인기 예능", lambda: self.show_frame("variety", self.variety_btns, self.variety_scr)),
+            ("🔄 데이터 갱신", self.update_data_event),
         ]
-
         for text, cmd in menu_items:
             btn = ctk.CTkButton(
                 frame,
                 text=text,
-                width=850,           
-                height=105,          
-                font=FontConfig.get("main_menu"), 
-                corner_radius=18,    
-                fg_color="#2B2B2B",  
+                width=850,
+                height=105,
+                font=FontConfig.get("main_menu"),
+                corner_radius=18,
+                fg_color="#2B2B2B",
                 text_color="#FFFFFF",
                 hover_color="#FF5722",
                 command=cmd,
             )
-            btn.pack(pady=12) 
+            btn.pack(pady=12)
             self.main_buttons.append(btn)
 
     def setup_content_pages(self):
@@ -256,11 +281,17 @@ class UltraMediaCenter(ctk.CTk):
             widget.destroy()
 
         ctk.CTkLabel(
-            frame, text=title, font=FontConfig.get("page_title"), text_color="#FF5722"
+            frame, 
+            text=title, 
+            font=FontConfig.get("page_title"), 
+            text_color="#FF5722"
         ).pack(pady=(30, 15))
-        
+
         scroll = ctk.CTkScrollableFrame(
-            frame, width=1200, height=580, fg_color="transparent"
+            frame, 
+            width=1200, 
+            height=580, 
+            fg_color="transparent"
         )
         scroll.pack(expand=True, fill="both", padx=60, pady=5)
 
@@ -268,14 +299,14 @@ class UltraMediaCenter(ctk.CTk):
         for item in items:
             btn = ctk.CTkButton(
                 scroll,
-                text=item.get('title', '제목 없음'),        
-                height=110,                
-                font=FontConfig.get("list_item"), 
-                anchor="center",           
+                text=item.get('title', '제목 없음'),
+                height=110,
+                font=FontConfig.get("list_item"),
+                anchor="center",
                 fg_color="#2B2B2B",
                 command=lambda u=item.get('url', ''): self.watch_video(u),
             )
-            btn.pack(fill="x", pady=8, padx=50) 
+            btn.pack(fill="x", pady=8, padx=50)
             buttons.append(btn)
 
         back = ctk.CTkButton(
@@ -283,7 +314,7 @@ class UltraMediaCenter(ctk.CTk):
             text="⬅ 뒤로가기 (ESC)",
             width=600,
             height=85,
-            font=FontConfig.get("back_btn"), 
+            font=FontConfig.get("back_btn"),
             fg_color="#444444",
             command=self.go_back,
         )
@@ -295,14 +326,11 @@ class UltraMediaCenter(ctk.CTk):
     def show_frame(self, name, buttons, scroll=None):
         if self.current_frame and self.active_frame_name != name:
             self.frame_stack.append((self.current_frame, self.current_buttons, self.current_scroll, self.active_frame_name))
-
         self.current_frame = self.frames[name]
         self.current_buttons = buttons
         self.current_scroll = scroll
         self.active_frame_name = name
         self.current_index = 0
-        
-        # 🔥 프레임을 맨 위로 끌어올려 화면에 표시함
         self.current_frame.tkraise()
         self.highlight()
 
@@ -314,40 +342,20 @@ class UltraMediaCenter(ctk.CTk):
             self.current_scroll = scroll
             self.active_frame_name = name
             self.current_index = 0
-            frame.tkraise()
+            self.current_frame.tkraise()
             self.highlight()
 
     def highlight(self):
-        if not self.current_buttons:
-            return
         for i, btn in enumerate(self.current_buttons):
-            try:
-                if i == self.current_index:
-                    btn.configure(fg_color="#FF5423", text_color="white")
-                    self.ensure_visible(btn)
+            if i == self.current_index:
+                btn.configure(fg_color="#FF5722")
+                if self.current_scroll and i < len(self.current_buttons) - 1:
+                    self.current_scroll._parent_canvas.yview_moveto(i / len(self.current_buttons))
+            else:
+                if btn == self.current_buttons[-1]:
+                    btn.configure(fg_color="#444444")
                 else:
-                    btn.configure(fg_color="#2B2B2B", text_color="#FFFFFF")
-            except Exception:
-                pass
-
-    def ensure_visible(self, btn):
-        if not self.current_scroll:
-            return
-        try:
-            self.update_idletasks()
-            canvas = self.current_scroll._parent_canvas
-            total_h = canvas.bbox("all")[3]
-            canvas_h = canvas.winfo_height()
-            if total_h > canvas_h:
-                cur_top, cur_bottom = canvas.yview()
-                btn_top = btn.winfo_y() / total_h
-                btn_bottom = (btn.winfo_y() + btn.winfo_height()) / total_h
-                if btn_top < cur_top:
-                    canvas.yview_moveto(btn_top)
-                elif btn_bottom > cur_bottom:
-                    canvas.yview_moveto(btn_bottom - (canvas_h / total_h))
-        except:
-            pass
+                    btn.configure(fg_color="#2B2B2B")
 
     def on_key(self, event):
         if not self.current_buttons:
